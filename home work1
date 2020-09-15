@@ -1,0 +1,138 @@
+---
+title: 'ECO B2000 Homework #1'
+author: "Zhanna Sarsenova"
+date: "9/14/2020"
+output: html_document
+---
+
+
+## Group members: 
+
+Adil Ryskulov, Zhanna Sarsenova, Ahabyona James, Mst Parvin and Nicole Dodson.
+
+
+##  “Adjust” the dice or play with the random number generator. Can you get them to roll a 6 more or less often than would be expected? How would you know - what is “more often”? Can you write some code in R that will simulate a fair roll?
+
+The result from dice rolling is following: [6,5,1,6,5,3,4,6,2,1,4,6,4,4,4,1,4,4,4,4]. As the dice has six sides, the probability of getting "six" is 1/6 - which is 16.7%. In this experiment, the dice was ralled twenty times and the number "six" could be significantly more often or fewer then expected due to small sample size. Larger the sample, closer the outcome to 16.67% probability. 
+Fair roll simulation using runif code. This coude generates a rundom numbers, however, these numbers will not be rounded. Thus, in order to simulate a fair dice we need to round it to the nearest integer. 
+```{r}
+round(runif(20, min = 1, max = 6), digits = 0)
+```
+ [1] 4 1 5 1 3 5 4 4 4 4 2 5 6 5 1 3 6 5 2 3
+ 
+
+## Replicate the commands given in the lecture notes R Basics for Lecture 1 to do some simple stats on the PUMS-NY data. Those notes request that you find average ages for men and women after accounting for the top-coding. Tell me something else interesting, that you learned from the data, for example about educational attainments in different neighborhoods in the city. Are there surprises for you?
+
+Replicate the commands given in the lecture notes R Basics for Lecture 1 to do some simple stats on the PUMS-NY data. Those notes request that you find average ages for men and women after accounting for the top-coding.
+```{r}
+load("C:/Users/Acer/Desktop/CCNY CUNY/2020/Fall 2020/Statistics and Introduction to Econometrics ECO B2000 2RS/R/PUMS data/ny/acs2017_ny_data.RData")
+attach(acs2017_ny)
+mean(AGE[female==1])
+sd(AGE[female==1])
+mean(AGE[female==0])
+sd(AGE[!female])
+
+table_1<-matrix(c(mean(AGE[female==1]),mean(AGE[female==0])), ncol = 1)
+colnames(table_1)<-c("Average age")
+row.names(table_1)<-c("Women's average age","Men's average age")
+table_1
+```
+[1] 42.71629
+[1] 23.72012
+[1] 40.35398
+[1] 23.1098
+                    Average age
+Women's average age    42.71629
+Men's average age      40.35398
+
+Tell me something else interesting, that you learned from the data, for example about educational attainments in different neighborhoods in the city. Are there surprises for you?
+Working through census data "acs2017 _ny" we find out that higher education level leads to shorter life expectancy among retirees living in Midwood and Flatbush neighborhoods of Brooklyn (PUMA==4015). We choose retirees because we believe that this group is least likely to advance in their education level.
+```{r}
+mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_nohs==1)])
+sd(AGE[(PUMA==4015)&(AGE>=65)&(educ_nohs==1)])
+mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_hs==1)])
+sd(AGE[(PUMA==4015)&(AGE>=65)&(educ_hs==1)])
+mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_somecoll==1)])
+sd(AGE[(PUMA==4015)&(AGE>=65)&(educ_somecoll==1)])
+mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_college==1)])
+sd(AGE[(PUMA==4015)&(AGE>=65)&(educ_college==1)])
+mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_advdeg==1)])
+sd(AGE[(PUMA==4015)&(AGE>=65)&(educ_advdeg==1)])
+
+table_2<-matrix(c(mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_nohs==1)]),mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_hs==1)]),mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_somecoll==1)]),mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_college==1)]),mean(AGE[(PUMA==4015)&(AGE>=65)&(educ_advdeg==1)])), ncol = 1)
+colnames(table_2)<-c("Average age")
+row.names(table_2)<-c("No High School","High School","Some college","College","Advanced")
+table_2
+```
+[1] 79.17143
+[1] 8.836707
+[1] 75.38554
+[1] 8.083152
+[1] 73.73529
+[1] 7.840489
+[1] 71.90698
+[1] 6.875817
+[1] 73.18182
+[1] 7.824448
+               Average age
+No High School    79.17143
+High School       75.38554
+Some college      73.73529
+College           71.90698
+Advanced          73.18182
+
+```{r}
+detach(acs2017_ny)
+```
+
+
+## Find the mean return on SP500 index (choose a time period). What is the mean return on days when the previous day’s return was positive? When the previous 2 days were positive? Negative? Now read about “hot hands fallacy” and tell if you think that helps investment strategy. 
+
+For this exercise we decided to consider S&P 500 Index's performance during 2019. The Excel spreadsheet obtained from St Louis Federal Reserve Bank consist the value on closing. In order to perform exercise we added dummy variables. First variable "previous day was positive" represents that previous trading day close with positive return. Meanwhile, "previous two days were positive" and "previous two days were negative"variables represent that previous two trading session closed with positive or negative return.
+```{r}
+setwd("C:/Users/Acer/Desktop/CCNY CUNY/2020/Fall 2020/Statistics and Introduction to Econometrics ECO B2000 2RS/R/S&P500")
+snp500 <- read.csv("SNP500.csv")
+attach(snp500)
+```
+
+
+"tot" represents an avarage daily return considering all trading sessions.
+"onepos" represents an avarage daiy return when previous trading session closed with possitive retun.
+"twopos" represents an avarage daiy return when two previous trading sessions closed with possitive retun.
+"oneneg" represents an avarage daiy return when previous trading session closed with negative retun.
+"twoneg" represents an avarage daiy return when two previous trading sessions closed with negative retun.
+```{r}
+tot<-round(mean(daily_return),digits = 5)*100
+tot
+onepos<-round(mean(daily_return[previous_day_was_positive==1]),digits = 5)*100
+onepos
+twopos<-round(mean(daily_return[previous_two_days_were_positive==1]),digits = 5)*100
+twopos
+oneneg<-round(mean(daily_return[previous_day_was_positive==0]),digits = 5)*100
+oneneg
+twoneg<-round(mean(daily_return[previous_two_days_were_negative==1]),digits = 5)*100
+twoneg
+
+table_3<-matrix(c(tot,onepos,twopos,oneneg,twoneg), ncol=1)
+colnames(table_3)<-c("Average daily return in %")
+row.names(table_3)<-c("All sessions","Last session positive","Last two sessions positive","Last session negative","Last two sessions negative")
+table_3
+```
+[1] 0.106
+[1] 0.136
+[1] 0.002
+[1] 0.063
+[1] -0.131
+                           Average daily return in %
+All sessions                                   0.106
+Last session positive                          0.136
+Last two sessions positive                     0.002
+Last session negative                          0.063
+Last two sessions negative                    -0.131
+
+Now read about “hot hands fallacy” and tell if you think that helps investment strategy. 
+The "hot hands fallacy" does not helps with investment strategy. The S&P 500 Index's 2019 performance reveles that during that period the index had on avarage 0.106% of daily return. If investors tried to find a patern between historical performans and future results, the investor will fail to achive higher returns because the probability of market to further growth is 50% and the analysis above demonstrates that this strategy will not be the most beneficial.
+
+```{r}
+detach(snp500)
+```
